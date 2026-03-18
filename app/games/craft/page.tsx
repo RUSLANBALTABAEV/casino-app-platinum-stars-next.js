@@ -1,0 +1,166 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+
+import GameViewport from '@/components/games/GameViewport';
+import { useTelegram } from '@/context/TelegramContext';
+import { buildTelegramAuthHeaders } from '@/lib/telegram';
+
+type InventoryItem = {
+  id: string;
+  name: string;
+  rarity: string;
+  imageUrl?: string | null;
+};
+
+type CraftResult = {
+  crafted: {
+    id: string;
+    name: string;
+    rarity: string;
+    imageUrl?: string | null;
+  };
+};
+
+export default function CraftPage(): React.JSX.Element {
+  const { initDataRaw } = useTelegram();
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [result, setResult] = useState<CraftResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadInventory = async () => {
+      try {
+        const response = await fetch('/api/mini-app/nfts', {
+          headers: buildTelegramAuthHeaders(initDataRaw),
+          signal: controller.signal
+        });
+        const payload = (await response.json().catch(() => null)) as { items?: InventoryItem[] };
+        if (!response.ok) {
+          return;
+        }
+        setInventory(payload.items ?? []);
+      } catch {
+        // ignore
+      }
+    };
+    void loadInventory();
+    return () => controller.abort();
+  }, [initDataRaw]);
+
+  const toggleGift = (id: string) => {
+    setSelected((prev) => (prev.includes(id) ? prev.filter((giftId) => giftId !== id) : [...prev, id]));
+  };
+
+  const craft = async () => {
+    setIsLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const response = await fetch('/api/mini-app/games/craft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...buildTelegramAuthHeaders(initDataRaw)
+        },
+        body: JSON.stringify({ giftIds: selected })
+      });
+      const payload = (await response.json().catch(() => ({}))) as { result?: CraftResult; error?: string };
+      if (!response.ok || !payload.result) {
+        throw new Error(payload.error ?? 'Не удалось выполнить крафт.');
+      }
+      setResult(payload.result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось выполнить крафт.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <GameViewport
+      backgroundClassName="bg-gradient-to-b from-[#071017] via-[#04080b] to-black"
+      contentClassName="flex flex-col gap-4"
+      backLabel="Игры"
+    >
+      <div className="space-y-2">
+        <p className="text-xs uppercase tracking-[0.24em] text-cyan-300/70">Craft</p>
+        <h1 className="text-2xl font-semibold text-white">Крафт NFT</h1>
+        <p className="text-sm text-white/60">Объединяйте 3 подарка, чтобы получить более редкий.</p>
+      </div>
+
+      <div className="relative overflow-hidden rounded-3xl border border-cyan-300/20 bg-gradient-to-br from-cyan-400/10 via-black/40 to-black/80 p-4 shadow-[0_24px_48px_rgba(0,0,0,0.35)]">
+        <div className="absolute -left-8 -top-10 h-24 w-24 rounded-full bg-cyan-300/20 blur-2xl animate-pulse" />
+        <div className="absolute -right-8 bottom-0 h-24 w-24 rounded-full bg-cyan-300/10 blur-2xl animate-pulse" />
+        <div className="relative mx-auto flex h-32 w-32 items-center justify-center rounded-full border border-cyan-300/30 bg-black/30">
+          <div className="absolute inset-4 rounded-full border border-cyan-300/40 animate-pulse" />
+          <img
+            src="/textures/games/flask-conical.svg"
+            alt=""
+            className="h-10 w-10 opacity-90"
+            aria-hidden
+          />
+        </div>
+      </div>
+
+      <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+        <p className="text-xs uppercase tracking-[0.16em] text-white/60">Выберите 3 NFT</p>
+        {inventory.length === 0 ? (
+          <p className="mt-2 text-xs text-white/50">Нет доступных NFT.</p>
+        ) : (
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {inventory.map((item) => {
+              const isActive = selected.includes(item.id);
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => toggleGift(item.id)}
+                  className={`flex items-center gap-3 rounded-2xl border px-3 py-2 text-left transition ${
+                    isActive ? 'border-cyan-400/70 bg-cyan-400/15' : 'border-white/10 bg-black/40'
+                  }`}
+                >
+                  <div className="h-10 w-10 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                    {item.imageUrl ? (
+                      <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-lg">🎁</div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/50">{item.rarity}</p>
+                    <p className="text-sm font-semibold text-white">{item.name}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        <button
+          className="mt-4 w-full rounded-full bg-cyan-300/90 px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-black transition active:scale-[0.98] disabled:opacity-60"
+          type="button"
+          onClick={craft}
+          disabled={isLoading || selected.length < 3}
+        >
+          {isLoading ? 'Крафтим...' : 'Скрафтить'}
+        </button>
+
+        {error ? (
+          <p className="mt-3 text-xs uppercase tracking-[0.16em] text-red-300">{error}</p>
+        ) : null}
+
+        {result ? (
+          <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
+            <p className="text-xs uppercase tracking-[0.18em] text-white/60">Новый подарок</p>
+            <p className="mt-2 text-lg font-semibold text-white">{result.crafted.name}</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-cyan-200">{result.crafted.rarity}</p>
+          </div>
+        ) : null}
+      </div>
+    </GameViewport>
+  );
+}

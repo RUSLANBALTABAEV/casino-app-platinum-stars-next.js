@@ -1,0 +1,233 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --safe-area-top: env(safe-area-inset-top);
+  --safe-area-bottom: env(safe-area-inset-bottom);
+  --tg-viewport-height: 100dvh;
+}
+[data-theme='light'] {
+  color-scheme: light;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  background-color: #0b0b0c;
+  overflow-x: hidden;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+}
+
+/* === ДОБАВЛЕНО ПО ТЗ (чёрно-золотая тема + модальные окна) === */
+.modal-bg {
+  background: rgba(0, 0, 0, 0.92) !important;
+  pointer-events: auto;
+}
+
+.modal-content {
+  overflow-y: auto;
+  max-height: 80vh;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #D4AF37 #0B0B0C;
+}
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 3px;
+}
+/* ======================================================= */
+
+html[data-holiday='1'] body {
+  background-color: #041022;
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(155, 236, 255, 0.18), transparent 42%),
+    radial-gradient(circle at 82% 8%, rgba(120, 200, 255, 0.14), transparent 46%),
+    radial-gradient(circle at 70% 86%, rgba(255, 220, 120, 0.12), transparent 45%),
+    radial-gradient(circle at 22% 78%, rgba(80, 200, 195, 0.14), transparent 48%),
+    linear-gradient(180deg, rgba(3, 10, 24, 0.95), rgba(6, 20, 36, 0.85) 55%, rgba(3, 8, 20, 0.96));
+  background-attachment: fixed;
+}
+body {
+  color: #f4f4f5;
+  line-height: 1.4;
+  min-height: var(--tg-viewport-height, 100dvh);
+  font-feature-settings: 'liga' 1, 'kern' 1;
+}
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+button {
+  font: inherit;
+}
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* Safe area utilities for notched devices */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left, 0);
+  }
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right, 0);
+  }
+  /* Touch-friendly interactions */
+  @media (hover: none) and (pointer: coarse) {
+    button,
+    a,
+    [role="button"] {
+      -webkit-tap-highlight-color: transparent;
+    }
+  }
+}
+@layer components {
+  .ui-kicker {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-platinum/60;
+  }
+  .ui-title {
+    @apply text-3xl font-semibold tracking-tight text-platinum;
+  }
+  .ui-lead {
+    @apply text-sm text-platinum/60;
+  }
+  .ui-card {
+    @apply relative overflow-hidden rounded-3xl border shadow-[0_24px_60px_rgba(0,0,0,0.35)];
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .ui-card-glass {
+    @apply backdrop-blur-[18px];
+  }
+  .ui-card-gold {
+    @apply border-gold-400/35 bg-black/35;
+  }
+  .ui-card-pad {
+    @apply p-5;
+  }
+  .ui-divider {
+    @apply h-px w-full bg-white/10;
+  }
+  .ui-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] transition duration-200 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
+  }
+  .ui-btn-primary {
+    @apply bg-gradient-to-r from-gold-400 to-gold-500 text-night shadow-[0_16px_34px_rgba(212,175,55,0.32)] hover:shadow-[0_18px_44px_rgba(212,175,55,0.45)];
+  }
+  .ui-btn-secondary {
+    @apply border text-platinum/90;
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .ui-btn-secondary:hover {
+    border-color: rgba(212, 175, 55, 0.45);
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .ui-btn-ghost {
+    @apply text-platinum/75 hover:text-platinum;
+  }
+  .ui-input {
+    @apply w-full rounded-2xl border px-4 py-3 text-base text-platinum outline-none transition;
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.5);
+  }
+  .ui-input:focus {
+    border-color: rgba(212, 175, 55, 0.7);
+  }
+  .ui-chip {
+    @apply inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-platinum/70;
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .ui-chip-gold {
+    @apply border;
+    border-color: rgba(212, 175, 55, 0.3);
+    background: rgba(203, 161, 53, 0.15);
+    color: #d4af37;
+  }
+
+  /* === ДОБАВЛЕНО ПО ТЗ (модальные окна + скролл) === */
+  .modal-content {
+    overflow-y: auto;
+    max-height: 80vh;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #D4AF37 #0B0B0C;
+  }
+  .modal-content::-webkit-scrollbar {
+    width: 6px;
+  }
+  .modal-content::-webkit-scrollbar-thumb {
+    background: #D4AF37;
+    border-radius: 3px;
+  }
+  /* ================================================ */
+}
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 0 rgba(212, 175, 55, 0.12);
+  }
+  50% {
+    box-shadow: 0 16px 42px rgba(212, 175, 55, 0.32);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(212, 175, 55, 0.12);
+  }
+}
+/* ... (весь остальной твой код до конца остаётся без изменений) ... */
+
+.ps-star {
+  position:absolute;
+  pointer-events:none;
+  animation: ps-star-fall var(--ps-dur, 1s) ease-in var(--ps-delay, 0s) both;
+  font-size: var(--ps-size, 1rem);
+  color: #D4AF37;
+}
+
+/* === ДОБАВЛЕНО ПО ТЗ (совместимость с tailwind.config.ts) === */
+@keyframes win-shine {
+  0% { text-shadow: 0 0 10px #D4AF37; }
+  50% { text-shadow: 0 0 40px #D4AF37, 0 0 60px #CBA135; }
+  100% { text-shadow: 0 0 10px #D4AF37; }
+}
+.animate-win-shine {
+  animation: win-shine 1.5s infinite ease-in-out;
+}
+
+@keyframes chest-open {
+  0% { transform: scale(0.6) rotate(-15deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.animate-chest-open {
+  animation: chest-open 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* ======================================================= */

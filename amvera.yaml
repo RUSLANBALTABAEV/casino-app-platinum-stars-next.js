@@ -1,0 +1,18 @@
+meta:
+  name: pfront
+  toolchain: node:20
+
+build:
+  image: node:20-alpine
+  commands:
+    - npm ci --ignore-scripts
+    - npx prisma generate
+    - npm run build
+
+run:
+  image: node:20-alpine
+  command: node .next/standalone/server.js
+  ports:
+    - 3000:3000
+  env:
+    NODE_ENV: production
