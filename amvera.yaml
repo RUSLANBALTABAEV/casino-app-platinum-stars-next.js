@@ -7,6 +7,7 @@ build:
   commands:
     - npm ci --ignore-scripts
     - npx prisma generate
+    - npx prisma migrate deploy
     - npm run build
 
 run:
