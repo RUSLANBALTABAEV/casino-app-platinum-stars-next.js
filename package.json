@@ -51,8 +51,5 @@
   },
   "engines": {
     "node": ">=20.12.2"
-  },
-  "overrides": {
-    "yaeti": "0.0.6"
   }
 }
