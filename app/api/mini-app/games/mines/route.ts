@@ -159,7 +159,7 @@ async function rewardNft({
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const rateResult = applyRateLimit(`${getClientIdentifier(req)}:miniapp-mines:post`, {
-    limit: 50,
+    limit: 120,
     windowMs: 60_000
   });
   if (!rateResult.success) {

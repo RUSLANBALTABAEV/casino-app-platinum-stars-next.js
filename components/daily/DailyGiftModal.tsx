@@ -40,15 +40,10 @@ export default function DailyGiftModal({
   useEffect(() => {
     if (!open || loading || reward === null) return;
 
-    const timer = setTimeout(() => {
-      setRevealed(true);
-      // Запускаем конфетти через небольшую задержку после анимации раскрытия
-      setTimeout(() => {
-        setConfetti(true);
-      }, 600);
-    }, 300); // ТЗ §5: было 1200мс — убрана большая задержка
-
-    return () => clearTimeout(timer);
+setRevealed(true);
+    // §5 ТЗ: показываем награду сразу после ответа API, конфетти через 400мс
+    const confettiTimer = setTimeout(() => setConfetti(true), 400);
+    return () => clearTimeout(confettiTimer);
   }, [open, loading, reward]);
 
   if (!open) return null;

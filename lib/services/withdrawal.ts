@@ -4,6 +4,7 @@ import type { Withdrawal } from '@/types/withdrawal';
 import * as WithdrawalEnums from '@/types/withdrawal-enums';
 import { prisma } from '@/lib/prisma';
 import { logSecurityEvent } from '@/lib/services/security';
+import { notifyWithdrawalSent, notifyWithdrawalRejected } from '@/lib/services/bot-notify';
 
 const NFT_TRANSFER_FEE_STARS = 25;
 
@@ -320,6 +321,14 @@ export async function rejectWithdrawal(
     }
   });
 
+  // §6 ТЗ: уведомляем пользователя об отклонении через бота
+  try {
+    const userRecord = await prisma.user.findUnique({ where: { id: updatedRecord.userId }, select: { telegramId: true } });
+    if (userRecord?.telegramId) {
+      void notifyWithdrawalRejected(userRecord.telegramId, updatedRecord.amount, reason);
+    }
+  } catch { /* уведомление некритично */ }
+
   return mapWithdrawal(updatedRecord);
 }
 
@@ -406,6 +415,14 @@ export async function markWithdrawalSent(
       adminId
     }
   });
+
+  // §6 ТЗ: уведомляем пользователя об успешном выводе через бота
+  try {
+    const userRecord = await prisma.user.findUnique({ where: { id: updatedRecord.userId }, select: { telegramId: true } });
+    if (userRecord?.telegramId) {
+      void notifyWithdrawalSent(userRecord.telegramId, updatedRecord.amount, updatedRecord.type ?? 'STARS');
+    }
+  } catch { /* уведомление некритично */ }
 
   return mapWithdrawal(updatedRecord);
 }

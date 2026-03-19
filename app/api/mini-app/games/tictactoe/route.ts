@@ -148,7 +148,7 @@ async function resolveUser(req: NextRequest) {
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const rateResult = applyRateLimit(`${getClientIdentifier(req)}:miniapp-ttt:post`, {
-    limit: 60,
+    limit: 120,
     windowMs: 60_000
   });
   if (!rateResult.success) {

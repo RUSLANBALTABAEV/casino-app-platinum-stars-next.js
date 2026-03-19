@@ -5,6 +5,7 @@ import * as WithdrawalEnums from '@/types/withdrawal-enums';
 import { applyHeaders, applyRateLimit } from '@/lib/http/rate-limit';
 import { getClientIdentifier } from '@/lib/http/request-helpers';
 import { listUserWithdrawals, submitWithdrawal } from '@/lib/services/withdrawal';
+import { maybeAutoProcess } from '@/lib/services/auto-withdrawal';
 import { syncTelegramUser } from '@/lib/services/user';
 import {
   assertInitDataIsFresh,
@@ -163,6 +164,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       comment: body.comment ?? null,
       meta: body.meta ?? {}
     });
+    // §6 ТЗ: запускаем авто-вывод немедленно после создания заявки (не ждём cron)
+    void maybeAutoProcess(withdrawal.id);
     return applyHeaders(NextResponse.json({ withdrawal }), rateResult);
   } catch (error: unknown) {
     const message =
