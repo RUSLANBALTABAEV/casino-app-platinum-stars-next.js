@@ -429,10 +429,10 @@ function registerHandlers(bot: Bot) {
       body: { telegramId: ctx.from.id, giftId, currency },
     });
     if (status !== 200 || data?.error) {
-      await ctx.answerCallbackQuery(
-        (data?.error as string) || "Не удалось купить NFT.",
-        { show_alert: true }
-      );
+      await ctx.answerCallbackQuery({
+        text: (data?.error as string) || "Не удалось купить NFT.",
+        show_alert: true,
+      });
       return;
     }
     const gift = (data.gift as Record<string, unknown>) || {};
@@ -456,10 +456,10 @@ function registerHandlers(bot: Bot) {
       body: { telegramId: ctx.from.id, userGiftId },
     });
     if (status !== 200 || data?.error) {
-      await ctx.answerCallbackQuery(
-        (data?.error as string) || "Не удалось продать NFT.",
-        { show_alert: true }
-      );
+      await ctx.answerCallbackQuery({
+        text: (data?.error as string) || "Не удалось продать NFT.",
+        show_alert: true,
+      });
       return;
     }
     const gift = (data.gift as Record<string, unknown>) || {};
@@ -475,7 +475,8 @@ function registerHandlers(bot: Bot) {
       params: { telegramId: String(ctx.from.id) },
     });
     if (status !== 200 || data?.error) {
-      await ctx.answerCallbackQuery("Не удалось получить информацию", {
+      await ctx.answerCallbackQuery({
+        text: "Не удалось получить информацию",
         show_alert: true,
       });
       return;
