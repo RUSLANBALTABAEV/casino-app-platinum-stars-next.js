@@ -78,7 +78,7 @@ const config: Config = {
         }
       },
       animation: {
-        'fade-in': 'fade-in 220ms ease-out',
+        'fade-in': 'fade-in 220ms ease-out forwards',
         'slide-up': 'slide-up 300ms ease-out',
         'slide-in-right': 'slide-in-right 300ms ease-out',
         'slide-in-left': 'slide-in-left 250ms ease-out',

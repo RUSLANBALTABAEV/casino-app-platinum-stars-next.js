@@ -142,13 +142,8 @@ export default function HomePage() {
     : numberFormatter.format(balanceState.available);
 
   return (
-    <main className="min-h-screen bg-night pb-24 pt-6 px-4 md:px-6">
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative space-y-6"
-      >
+    <div className="w-full pb-24 pt-6 px-4 md:px-6 text-platinum">
+      <div className="relative space-y-6">
         {/* Онлайн + демо */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 rounded-full bg-accent/80 px-3 py-1.5 text-sm font-medium text-emerald-300 backdrop-blur-sm border border-emerald-500/20">
@@ -197,7 +192,7 @@ export default function HomePage() {
             <AnimatePresence mode="wait">
               <motion.p
                 key={balanceDisplay}
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 className="text-3xl font-bold text-gold tracking-tight animate-win-shine"
@@ -231,10 +226,8 @@ export default function HomePage() {
             </motion.button>
           ))}
         </div>
-      </motion.header>
+      </div>
 
-      {/* Нижняя навигация или контент — можно добавить BottomNav здесь или в layout */}
-      {/* <BottomNav />  — если компонент уже создан */}
-    </main>
+    </div>
   );
 }

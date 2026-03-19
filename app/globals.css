@@ -26,6 +26,11 @@ body {
   overscroll-behavior-y: contain;
 }
 
+/* КРИТИЧНО: без forwards CSS-анимации сбрасываются в opacity:0 в Telegram WebView */
+[class*="animate-"] {
+  animation-fill-mode: both;
+}
+
 /* === ДОБАВЛЕНО ПО ТЗ (чёрно-золотая тема + модальные окна) === */
 .modal-bg {
   background: rgba(0, 0, 0, 0.92) !important;

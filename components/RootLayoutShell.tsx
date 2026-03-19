@@ -139,7 +139,7 @@ function RootLayoutShell({ children }: { children: ReactNode }): React.JSX.Eleme
             : 'max-w-[600px] px-5 pb-[calc(7.5rem+var(--safe-area-bottom))] pt-[calc(1.5rem+var(--safe-area-top))]' // Восстановлено
         )}
       >
-        <main key={pathname} className="flex-1 animate-fade-in">
+        <main key={pathname} className="flex-1 opacity-100">
           {children}
         </main>
       </div>
