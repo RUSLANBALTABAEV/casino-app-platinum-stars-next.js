@@ -1,11 +1,9 @@
 import type { Metadata, Viewport } from 'next';
-import Script from 'next/script';
 import React from 'react';
 
 import RootLayoutShell from '@/components/RootLayoutShell';
 import { TelegramProvider } from '@/context/TelegramContext';
 import ErudaLoader from '@/components/ErudaLoader';
-import { prisma } from '@/lib/prisma';
 
 import './globals.css';
 
@@ -30,11 +28,14 @@ export const viewport: Viewport = {
 
 async function getTheme(): Promise<'holiday' | 'regular'> {
   try {
+    // Динамический импорт защищает layout от краша при недоступности БД
+    const { prisma } = await import('@/lib/prisma');
     const setting = await prisma.systemSetting.findUnique({
       where: { key: 'site_theme' }
     });
     return (setting?.value as 'holiday' | 'regular') ?? 'holiday';
   } catch {
+    // БД недоступна — показываем приложение с темой по умолчанию
     return 'holiday';
   }
 }
@@ -49,8 +50,17 @@ export default async function RootLayout({
 
   return (
     <html lang="ru" data-holiday={isHoliday ? '1' : '0'} suppressHydrationWarning>
+      <head>
+        {/*
+          КРИТИЧНО: Telegram WebApp SDK ОБЯЗАН загружаться синхронно в <head>
+          до любого React кода. Использование next/script с strategy="beforeInteractive"
+          в <body> в App Router НЕ гарантирует загрузку до гидратации.
+          Используем нативный <script> тег напрямую в <head>.
+        */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="https://telegram.org/js/telegram-web-app.js" />
+      </head>
       <body className="font-sans">
-        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
         <ErudaLoader />
         <TelegramProvider>
           <RootLayoutShell>{children}</RootLayoutShell>

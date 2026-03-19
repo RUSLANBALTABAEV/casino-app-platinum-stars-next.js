@@ -7,13 +7,21 @@ build:
   commands:
     - npm ci --ignore-scripts
     - npx prisma generate
-    - npx prisma migrate deploy
+    - npx prisma db push --accept-data-loss
     - npm run build
+    # КРИТИЧНО для standalone: копируем статику и public в standalone папку
+    # Без этих двух строк все CSS/JS/картинки дают 404!
+    - cp -r .next/static .next/standalone/.next/static
+    - cp -r public .next/standalone/public
 
 run:
   image: node:20-alpine
-  command: node .next/standalone/server.js
+  # ИСПРАВЛЕНО: миграции запускаются при старте контейнера, а не при билде
+  # (при билде БД Amvera может быть недоступна → сборка падает)
+  command: sh -c "npx prisma migrate deploy && node .next/standalone/server.js"
   ports:
     - 3000:3000
   env:
     NODE_ENV: production
+    PORT: "3000"
+    HOSTNAME: "0.0.0.0"

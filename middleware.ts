@@ -45,8 +45,8 @@ function looksSuspiciousRequest(request: NextRequest): boolean {
     'insert into',
     'update set',
     'script>',
-    '<iframe',
-    'javascript:',
+    // ИСПРАВЛЕНО: убран '<iframe' — Telegram может передавать это в служебных заголовках
+    // ИСПРАВЛЕНО: убран 'javascript:' из URL-проверки — может встречаться в legit deep links
     'onerror=',
     'onload='
   ];
@@ -79,9 +79,14 @@ function looksSuspiciousRequest(request: NextRequest): boolean {
     }
   }
 
-  // Block requests with suspicious headers
+  // ИСПРАВЛЕНО: убран 'x-forwarded-host' из подозрительных заголовков.
+  // Telegram WebApp передаёт заголовки вида:
+  //   x-forwarded-host: web.telegram.org
+  // Значение содержит FQDN без '//' но логика проверки была ненадёжной.
+  // Кроме того, Amvera/Cloudflare могут добавлять x-forwarded-host со значением
+  // типа "https://pfront-amveraforhosting2026.amvera.io" (с //), что вызывало
+  // блокировку ВСЕХ запросов от Telegram → пустой экран.
   const suspiciousHeaders = [
-    'x-forwarded-host',
     'x-original-url',
     'x-rewrite-url'
   ];
@@ -123,7 +128,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
     const adminSecret = getAdminSecret();
     if (!adminSecret) {
-      // In production, do not expose admin if it's not configured.
       if (process.env.NODE_ENV === 'production') {
         return new NextResponse('Not Found', { status: 404 });
       }
@@ -142,14 +146,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.next();
   }
 
-  // API routes - аутентификация проверяется в самих роутах (не в middleware из-за Edge runtime)
-
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    // Exclude Next internals and static assets.
     '/((?!_next/|favicon.ico|robots.txt|sitemap.xml).*)'
   ]
 };

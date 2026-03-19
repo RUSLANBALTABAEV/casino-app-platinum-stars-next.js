@@ -25,6 +25,13 @@ const nextConfig = {
       {
         source: '/:path*',
         headers: [
+          // КРИТИЧНО: разрешаем Telegram загружать приложение в iframe
+          // Next.js по умолчанию ставит X-Frame-Options: SAMEORIGIN — это ломает Mini App!
+          { key: 'X-Frame-Options', value: 'ALLOWALL' },
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' https://web.telegram.org https://*.telegram.org https://telegram.org",
+          },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           {
@@ -40,7 +47,7 @@ const nextConfig = {
     NEXT_PUBLIC_MINI_APP_URL:
       process.env.NEXT_PUBLIC_MINI_APP_URL ??
       process.env.TELEGRAM_MINI_APP_URL ??
-      'amvera-amveraforhosting2026-run-pfront',        // ← замени на свой реальный домен Amvera
+      'https://pfront-amveraforhosting2026.amvera.io',        // ← замени на свой реальный домен Amvera
 
     NEXT_PUBLIC_TOPUP_URL: process.env.NEXT_PUBLIC_TOPUP_URL ?? '',
     NEXT_PUBLIC_WITHDRAW_URL: process.env.NEXT_PUBLIC_WITHDRAW_URL ?? '',
